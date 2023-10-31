@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  api:
+    build: .
+    image: add-in-api
+    container_name: add-in-api
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    env_file:
+      - .development.env
+    volumes:
+       - .:/usr/app
+       - /usr/app/node_modules
+    working_dir: /usr/app
+    ports:
+       - "${PORT}:${PORT}"
+    command: npm run start:dev
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER_NAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    restart: always
+    env_file:
+      - .development.env
+    ports:
+      - '3306:3306'
+    volumes:
+      - add_in_data:/var/lib/mysql
+
+volumes:
+  add_in_data:

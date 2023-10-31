@@ -1,0 +1,23 @@
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+  
+jobs:
+  run_pull:
+    name: run pull
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: install ssh keys
+      # check this thread to understand why its needed:
+      # https://stackoverflow.com/a/70447517
+      run: |
+        install -m 600 -D /dev/null ~/.ssh/id_rsa
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+        ssh-keyscan -H 3.18.169.54 > ~/.ssh/known_hosts
+    - name: connect and pull
+      run: ssh ubuntu@3.18.169.54 "cd /var/www/api-dev.appsdowonders.com/html && sudo git stash && sudo git checkout dev && sudo git pull && exit"
+    - name: cleanup
+      run: rm -rf ~/.ssh
